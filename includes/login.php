@@ -13,18 +13,32 @@
 		}
 
 		public function index(){
-			if($_SERVER['REQUEST_METHOD'] === 'POST'){
-				$this->validateDetails();
-			}else if(!empty($_GET['status'])){
-				if($_GET['status'] == 'inactive'){
-					$error = 'You have been logged out due to inactivity. Please login again.';
+			if (!empty($_GET['status']) && $_GET['status'] == 'logout') {
+				session_unset();
+				session_destroy();
+				$error = 'You have been logged out. Please log in again.';
+				require_once 'admin/templates/loginform.php';
+			} elseif (!empty($_SESSION['kickstart_login']) && $_SESSION['kickstart_login') {
+				header('Location: ' . $this->base->url . 'admin/posts.php');
+				exit();
+			} else {
+				if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+					$this->validateDetails();
+				} elseif (!empty($_GET['status'])) {
+					if ($_GET['status'] == 'inactive') {
+						session_unset();
+						session_destroy();
+						$error = 'You have been logged out due to inactivity. Please log in again.';
+					}
 				}
+				require_once('admin/templates/loginform.php');
 			}
-			require_once('admin/templates/loginform.php');
 		}
 
 		public function loginSuccess(){
-			header('Location: http://'.$_SERVER['SERVER_NAME'].':8888/kickstart2/admin/posts.php');
+			$_SESSION['kickstart_login'] = true;
+			$_SESSION["timeout"] = time();
+			header('Location: ' . $this->base->url . '/admin/posts.php');
 			return;
 		}
 

@@ -3,9 +3,26 @@
 	require_once('database.php');
 	class Adminpanel{
 		public function __construct(){
-			$this->ksdb = new Database;
-			$this->base = (object) '';
-			$this->base->url = "http://".$_SERVER['SERVER_NAME'].":8888/kickstart2";
+			$inactive = 600;
+			if (isset($_SESSION["kickstart_login"])) {
+				$sessionTTL = time() - $_SESSION["timeout"];
+				if ($sessionTTL > $inactive) {
+					session_unset();
+					session_destroy();
+					header("location: http://" . $_SERVER['SERVER_NAME'] . ":8888/kickstart2/login.php?status=inactive");
+				}
+			}
+			$_SESSION["timeout"] = time();
+			$login = $_SESSION['kickstart_login'];
+			if (empty($login)) {						// ! in front of empty???
+				session_unset();
+				session_destroy();
+				header('Location: http://' . $_SERVER['SERVER_NAME'] . ':8888/kickstart2/login.php?status=loggedout');
+			} else {
+				$this->ksdb = new Database;
+				$this->base = (object) '';
+				$this->base->url = 'http://'.$_SERVER['SERVER_NAME'].":8888/kickstart2";
+			}
 		}
 	}
 
@@ -23,6 +40,9 @@
 						break;
 					case 'save':
 						$this->savePost();
+						break;
+					case 'delete':
+						$this->deletePost();
 						break;
 				}
 			}else{
@@ -79,6 +99,7 @@
 				$i++;
 			}
 			try {
+				// This query has an SQL injection vulnerability
 				$query = $this->ksdb->db->prepare("INSERT INTO posts(".$cols.") VALUES (".$values.")");
 				for($c=0;$c<$i;$c++){
 					$query->bindParam($format[$c], ${'var'.$c});
@@ -95,18 +116,27 @@
 			}
 			$query->closeCursor();
 			$this->db = null;
-			//$add = $this->ksdb->dbadd('posts', $array, $format);
 			if(!empty($add)){
 				$status = array('success' => 'Your post has been saved successfully.');
 			}else{
 				$status = array('error' => 'There has been an error saving your post. Please try again later.');
 			}
-			header("Location: http://localhost/kickstart/admin/posts.php");
-			
+			header("Location: " . $this->base->url . "/admin/posts.php");
 		}
 
 		public function deletePost(){
-			
+			if (!empty($_GET['id']) && is_numeric($_GET['id'])) {
+				$query = "DELETE FROM 'posts' WHERE id = ?";
+				$stmt = $this->db->prepare($query);
+				$stmt->execute(array($_GET['id']));
+				$delete = $stmt->rowCount();
+				$this->db = null;
+				if (!empty($delete) && $delete > 0) {
+					header("Location: " . $this->base->url . "/posts.php?delete=success");
+				} else {
+					header("Location: " . $this->base->url . "/posts.php?delete=error");
+				}
+			}
 		}
 
 	}
@@ -115,10 +145,44 @@
 
 		public function __construct(){
 			parent::__construct();
+			if (!empty($_GET['action']) && $_GET['action'] == 'delete') {
+				$this->deleteComment();
+			} else {
+				$this->listComments();
+			}
 		}
 
 		public function listComments(){
+			$comments = $return = array();
+			$query = $this->ksdb->db->prepare("SELECT * FROM comments");
+			try {
+				$query->execute();
+				for ($i = 0; $row = $query->fetch(); $i++) {
+					$return[$i] = array();
+					foreach ($row as $key => $rowitem) {
+						$return[$i][$key] = $rowitem;
+					}
+				}
+			} catch (PDOException $e) {
+				echo $e->getMessage();
+			}
+			$comments = $return;
+			require_once 'templates/managecomments.php';
+		}
 
+		public function deleteComment() {
+			if (!empty($_GET['id']) && is_numeric($_GET['id'])) {
+				$query = "DELETE FROM 'comments' WHERE id = ?";
+				$stmt = $this->db->prepare($query);
+				$stmt->execute(array($_GET['id']));
+				$delete = $result->rowCount();
+				$this->db = null;
+				if(!empty($delete) && $delete >0) {
+					header("Location: ".$this->base->url."/comments.php?delete=success");
+				} else {
+					header("Location: ".$this->base->url."/comments.php?delete=error");
+				}
+			}
 		}
 
 		public function deletePost(){

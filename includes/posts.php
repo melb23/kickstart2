@@ -48,23 +48,25 @@ class Posts extends Blog{
 
 	public function viewPost($postId){
 		$id = $postId;
-		$posts = $return = array();
-		$template = '';
-		//$posts = $this->ksdb->dbselect('posts', array('*'));
-		$query = $this->ksdb->db->prepare("SELECT * FROM posts WHERE id = ".$id);
-		try {
-			$query->execute();
-			for($i=0; $row = $query->fetch(); $i++){
-				$return[$i] = array();
-				foreach($row as $key => $rowitem){
-					$return[$i][$key] = $rowitem;
-				}
-			}
-		}catch (PDOException $e) {
-			echo $e->getMessage();
-		}
-		$posts = $return;
-		$posts[0]['content'] = $posts[0]['content'];
+		$posts = $this->ksdb->dbselect('posts', array('*'), array('id =>$id'));
+		$markdown = new Michelf\Markdown();
+		$posts[0]['content'] = $markdown->defaultTransform($post[0]['content']);
+		$postcomments = $this->comments->getcomments($posts[0]['id']);
+//		$template = '';
+//		$query = $this->ksdb->db->prepare("SELECT * FROM posts WHERE id = ".$id);
+//		try {
+//			$query->execute();
+//			for($i=0; $row = $query->fetch(); $i++){
+//				$return[$i] = array();
+//				foreach($row as $key => $rowitem){
+//					$return[$i][$key] = $rowitem;
+//				}
+//			}
+//		}catch (PDOException $e) {
+//			echo $e->getMessage();
+//		}
+//		$posts = $return;
+//		$posts[0]['content'] = $posts[0]['content'];
 		$template = 'view-post.php';
 		include_once('frontend/templates/'.$template);
 	}
