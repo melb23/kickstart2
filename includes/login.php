@@ -1,5 +1,6 @@
 <?php
 	require_once('database.php');
+	session_start();
 	class Login{
 
 		public $ksdb = '';
@@ -17,9 +18,9 @@
 				session_unset();
 				session_destroy();
 				$error = 'You have been logged out. Please log in again.';
-				require_once 'admin/templates/loginform.php';
-			} elseif (!empty($_SESSION['kickstart_login']) && $_SESSION['kickstart_login') {
-				header('Location: ' . $this->base->url . 'admin/posts.php');
+				require_once('admin/templates/loginform.php');
+			} elseif (!empty($_SESSION['kickstart_login']) && $_SESSION['kickstart_login'] = true) {
+				header('Location: ' . $this->base->url . '/admin/posts.php');
 				exit();
 			} else {
 				if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -47,6 +48,7 @@
 		}
 
 		private function validateDetails(){
+			$return = array();
 			if(!empty($_POST['name']) && !empty($_POST['password'])){
 				$salt = '$2a$07$R.gJb2U2N.FmZ4hPp1y2CN$';
 				$password = crypt($_POST['password'], $salt);

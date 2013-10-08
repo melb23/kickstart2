@@ -12,7 +12,7 @@
 		    	<label class="control-label" for="wmd-input">Content</label>
 		    	<div class="wmd-panel controls">
 		    		<div id="wmd-button-bar"></div>
-		    		<textarea class="wmd-input" name="post[content]" id="wmd-input">Start typing here*</textarea>
+		    		<textarea class="wmd-input" name="post[content]" id="wmd-input">*Start typing here*</textarea>
 		    	</div>
 		    </div>
 		    <div class="control-group">

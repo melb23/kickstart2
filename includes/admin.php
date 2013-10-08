@@ -78,6 +78,7 @@
 		}
 
 		public function savePost(){
+			$status = '';
 			$array = $format = $return = array();
 			if(!empty($_POST['post'])){
 				$post = $_POST['post'];
@@ -86,6 +87,10 @@
 				$array['content'] = $post['content'];
 				$format[] = ':content'; 
 			} 
+			if(!empty($post['title'])) {
+				$array['title'] = $post['title'];
+				$format[] = ':title';
+			}
 			$cols = $values = '';
 			$i=0;
 			foreach($array as $col => $data){
@@ -116,20 +121,21 @@
 			}
 			$query->closeCursor();
 			$this->db = null;
-			if(!empty($add)){
+			if(!empty($add) && $add > 0){
 				$status = array('success' => 'Your post has been saved successfully.');
+				$key = 'succes';
 			}else{
 				$status = array('error' => 'There has been an error saving your post. Please try again later.');
+				$key = 'error';
 			}
-			header("Location: " . $this->base->url . "/admin/posts.php");
+			header("Location: " . $this->base->url . "/posts.php?status=".$key);
 		}
 
 		public function deletePost(){
 			if (!empty($_GET['id']) && is_numeric($_GET['id'])) {
-				$query = "DELETE FROM 'posts' WHERE id = ?";
-				$stmt = $this->db->prepare($query);
-				$stmt->execute(array($_GET['id']));
-				$delete = $stmt->rowCount();
+				$query = "DELETE FROM 'posts' WHERE id = ".$_GET['id'];
+				$result = $this->db->query($query);
+				$delete = $result->rowCount();
 				$this->db = null;
 				if (!empty($delete) && $delete > 0) {
 					header("Location: " . $this->base->url . "/posts.php?delete=success");
@@ -159,7 +165,7 @@
 				$query->execute();
 				for ($i = 0; $row = $query->fetch(); $i++) {
 					$return[$i] = array();
-					foreach ($row as $key => $rowitem) {
+					foreach($row as $key => $rowitem) {
 						$return[$i][$key] = $rowitem;
 					}
 				}
@@ -172,9 +178,8 @@
 
 		public function deleteComment() {
 			if (!empty($_GET['id']) && is_numeric($_GET['id'])) {
-				$query = "DELETE FROM 'comments' WHERE id = ?";
-				$stmt = $this->db->prepare($query);
-				$stmt->execute(array($_GET['id']));
+				$query = "DELETE FROM 'comments' WHERE id = ".$_GET['id'];
+				$result = $this->db->query($query);
 				$delete = $result->rowCount();
 				$this->db = null;
 				if(!empty($delete) && $delete >0) {
@@ -184,11 +189,6 @@
 				}
 			}
 		}
-
-		public function deletePost(){
-			
-		}
-		
 	}
 
 	$admin = new Adminpanel();

@@ -3,7 +3,8 @@
 <head>
 	<title>Kickstart - Admin Panel</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link href="http://jsphp.learn:8888/kickstart2/includes/css/bootstrap.min.css" rel="stylesheet" media="screen">
+	<link href="kickstart2/includes/css/bootstrap.min.css" rel="stylesheet" media="screen">
+	<link href="kickstart2/includes/css/Markdown.css" rel="stylesheet" media="screen">
 	<script>
 		(function () {
 			var converter = new Markdown.Converter();
@@ -15,4 +16,4 @@
 <body>
 	<section class="container">
 		<br/>
-		<a href="/logout" class="btn btn-info">Logout</a>
+		<a href="<?php echo 'http://'.$_SERVER["SERVER_NAME"].'/kickstart2/login.php?status=logout'; ?>" class="btn btn-info">Logout</a>

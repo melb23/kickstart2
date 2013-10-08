@@ -3,12 +3,12 @@
 <a href="<?php echo $this->base->url; ?>" class="btn btn-primary">Return to Post List</a>
 <article>
 <?php foreach($posts as $post): ?>
-	<h3><?php echo (!empty($post['title']) ? htmlspecialchars($post['title'] : 'Post #' . htmlspecialchars($post['id'])); ?></h3>
-		<?php echo ($post['content']); ?>
+	<h3><?php echo (!empty($post['title'])? htmlspecialchars($post['title'] : 'Post #' . htmlspecialchars($post['id'])); ?></h3>
+		<?php echo $post['content']; ?>
 	<hr/>
 <?php endforeach; ?>
 <h3>Comments</h3>
-<?php foreach ($postcomments as $comments): ?>
+<?php foreach ($postComments as $comment): ?>
 	<section class="span3">
 		<figure>
 			<img src="http://www.gravatar.com/avatar/<?php echo md5($comment['email']); ?>" alt="" />
@@ -24,14 +24,14 @@
 <br />
 <h3>Leave Comment</h3>
 <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="POST" class="form-horizontal">
-	<input type="hidden" value="<?php echo $_GET['id']; ?>" name="comment[posted]" />
+	<input type="hidden" value="<?php echo $_GET['id']; ?>" name="comment[postid]" />
 	<div class="control-group <?php echo (!empty($error)? 'error': ''); ?>">
 		<label class="control-label" for="email">Email</label>
 		<div class="controls">
 			<input type="email" name="comment[email]" id="email" placeholder="Your Email Address" />
 		</div>
 	</div>
-	<div class="control-group <?php echo (!empty($error) ? 'error' : ''); ?>">
+	<div class="control-group <?php echo (!empty($error)? 'error': ''); ?>">
 		<label class="control-label" for="name">Full Name</label>
 		<div class="controls">
 			<input type="text" name="comment[fullname]" id="name" placeholder="Your Full Name" />
